@@ -46,7 +46,7 @@ try {
     echo "<h2>Query 2: Top Actors by Movie Count</h2>";
     executeQuery($conn, $query2);
 
-    // Query 3: Create a view to display movies and their genres
+    //Create a view to display movies and their genres
     $createViewQuery = "
         CREATE OR REPLACE VIEW Movie_Genre_View AS
         SELECT m.title, m.genre
@@ -55,7 +55,7 @@ try {
     $stmt = $conn->prepare($createViewQuery);
     $stmt->execute();
 
-    // Query 4: Select all movies and their genres from the created view
+    // Query 3: Select all movies and their genres from the created view
     $query3 = "
         SELECT * FROM Movie_Genre_View;
     ";
