@@ -1,8 +1,0 @@
-use Movies;
-
-db.createCollection("Movie");
-db.createCollection("InternetUser");
-db.createCollection("Score_movie");
-db.Movie.createCollection("Country");
-db.Movie.createCollection("Artist");
-db.Movie.createCollection("Role");
