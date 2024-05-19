@@ -26,10 +26,13 @@ dfs = {}
 for sheet_name in sheets_to_read:
     dfs[sheet_name] = pd.read_excel(excel_file, sheet_name=sheet_name)
 
-# Now, dfs dictionary contains DataFrames for each selected sheet
-# You can access the DataFrames using their sheet names as keys
-# For example:
-print(dfs['Movie Table'])  # Print DataFrame
+
+data_to_insert = []
+    for movie in dfs['Movie Table']:
+        movie['actors'] = [actor for actor in actor_records if actor['movieId'] == movie_record['movieId']]
+        data_to_insert.append(movie_record)
+
+
 
 # Convert DataFrame to JSON
 movieJson = json.loads(dfs['Movie Table'].to_json(orient='records'))
