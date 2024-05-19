@@ -3,7 +3,7 @@
 $host = 'bvk6p7stycgeooolszfe-mysql.services.clever-cloud.com';
 $dbname = 'bvk6p7stycgeooolszfe';
 $username = 'utknvlfaehqhnhvj';
-$password = 'xyIHcLRKWLDnPTEg7oRF';
+$password = 'F2si8fp7rKnM4CFhMrzJ';
 
 try {
     // Connect to the database
