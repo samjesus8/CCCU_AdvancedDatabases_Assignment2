@@ -1,0 +1,8 @@
+
+use mydatabase;
+
+db.createCollection("Movie");
+db.createCollection("Country");
+db.createCollection("Artist");
+db.createCollection("InternetUser");
+db.createCollection("Score_movie");
