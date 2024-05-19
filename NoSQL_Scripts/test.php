@@ -2,7 +2,6 @@
 require 'vendor/autoload.php'; // Include Composer's autoloader
 
 use MongoDB\Client as MongoClient;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
 // Database connection details
 $mongoHost = 'mongodb+srv://RyanJudd96:Flapjack96@movies.sz0lxn6.mongodb.net/';
@@ -14,29 +13,33 @@ try {
     $db = $client->$mongoDBName;
     echo "Connected to MongoDB successfully<br>";
 
-    // Load the Excel file
-    $spreadsheet = IOFactory::load('Movies Data.xlsx');
-
-    // Get data from each sheet and insert into MongoDB
+    // Function to read CSV file and convert to array
+    function readCSV($filePath) {
+        $file = fopen($filePath, 'r');
+        $header = fgetcsv($file);
+        $data = [];
+        while ($row = fgetcsv($file)) {
+            $data[] = array_combine($header, $row);
+        }
+        fclose($file);
+        return $data;
+    }
 
     // Insert data into Movies collection
-    $moviesSheet = $spreadsheet->getSheetByName('Movies');
-    $moviesData = $moviesSheet->toArray(null, true, true, true);
+    $moviesData = readCSV('movies.csv');
     $moviesCollection = $db->movies;
 
-    foreach ($moviesData as $index => $row) {
-        if ($index == 1) continue; // Skip header row
-
+    foreach ($moviesData as $row) {
         $movie = [
-            'title' => $row['A'],
-            'year' => intval($row['B']),
-            'genre' => $row['C'],
-            'summary' => $row['D'],
-            'producerId' => new MongoDB\BSON\ObjectId($row['E']),
+            'title' => $row['title'],
+            'year' => intval($row['year']),
+            'genre' => $row['genre'],
+            'summary' => $row['summary'],
+            'producerId' => new MongoDB\BSON\ObjectId($row['producerId']),
             'country' => [
-                'code' => $row['F'],
-                'name' => $row['G'],
-                'language' => $row['H']
+                'code' => $row['country_code'],
+                'name' => $row['country_name'],
+                'language' => $row['country_language']
             ],
             'roles' => [], // Will be populated later
             'scores' => [] // Will be populated later
@@ -45,56 +48,52 @@ try {
     }
 
     // Insert data into Users collection
-    $usersSheet = $spreadsheet->getSheetByName('Internet Users');
-    $usersData = $usersSheet->toArray(null, true, true, true);
+    $usersData = readCSV('InternetUserTable.csv');
     $usersCollection = $db->users;
 
-    foreach ($usersData as $index => $row) {
-        if ($index == 1) continue; // Skip header row
-
+    foreach ($usersData as $row) {
         $user = [
-            '_id' => $row['A'],
-            'surname' => $row['B'],
-            'name' => $row['C'],
-            'region' => $row['D']
+            '_id' => $row['email'],
+            'surname' => $row['surname'],
+            'name' => $row['name'],
+            'region' => $row['region']
         ];
         $usersCollection->insertOne($user);
     }
 
     // Insert data into Roles collection and update Movies collection
-    $rolesSheet = $spreadsheet->getSheetByName('Roles');
-    $rolesData = $rolesSheet->toArray(null, true, true, true);
+    $rolesData = readCSV('RoleTable.csv');
 
-    foreach ($rolesData as $index => $row) {
-        if ($index == 1) continue; // Skip header row
-
-        $movieId = new MongoDB\BSON\ObjectId($row['A']);
-        $actorId = new MongoDB\BSON\ObjectId($row['B']);
-        $roleName = $row['C'];
+    foreach ($rolesData as $row) {
+        $movieId = new MongoDB\BSON\ObjectId($row['movieId']);
+        $actorId = new MongoDB\BSON\ObjectId($row['actorId']);
+        $roleName = $row['roleName'];
 
         $artist = $db->artists->findOne(['artistId' => $actorId]);
-        $role = [
-            'actorId' => $actorId,
-            'roleName' => $roleName,
-            'artist' => $artist
-        ];
 
-        $moviesCollection->updateOne(
-            ['_id' => $movieId],
-            ['$push' => ['roles' => $role]]
-        );
+        if ($artist) {
+            $role = [
+                'actorId' => $actorId,
+                'roleName' => $roleName,
+                'artist' => $artist
+            ];
+
+            $moviesCollection->updateOne(
+                ['_id' => $movieId],
+                ['$push' => ['roles' => $role]]
+            );
+        } else {
+            echo "Warning: Artist with ID $actorId not found.<br>";
+        }
     }
 
     // Insert data into Scores collection and update Movies collection
-    $scoresSheet = $spreadsheet->getSheetByName('Scores');
-    $scoresData = $scoresSheet->toArray(null, true, true, true);
+    $scoresData = readCSV('ScoreMovieTable.csv');
 
-    foreach ($scoresData as $index => $row) {
-        if ($index == 1) continue; // Skip header row
-
-        $email = $row['A'];
-        $movieId = new MongoDB\BSON\ObjectId($row['B']);
-        $score = intval($row['C']);
+    foreach ($scoresData as $row) {
+        $email = $row['userEmail'];
+        $movieId = new MongoDB\BSON\ObjectId($row['movieId']);
+        $score = intval($row['score']);
 
         $scoreEntry = [
             'userEmail' => $email,
