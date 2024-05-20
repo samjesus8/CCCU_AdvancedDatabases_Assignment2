@@ -4,7 +4,7 @@ require 'vendor/autoload.php'; // Include Composer's autoloader
 use MongoDB\Client as MongoClient;
 
 // Database connection details
-$mongoHost = 'mongodb+srv://RyanJudd96:Flapjack96@movies.sz0lxn6.mongodb.net/';
+$mongoHost = 'mongodb+srv://RyanJudd96:password1234@movies.sz0lxn6.mongodb.net/';
 $mongoDBName = 'Movies';
 
 try {
