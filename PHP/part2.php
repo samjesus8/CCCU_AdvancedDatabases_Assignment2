@@ -50,7 +50,7 @@ $query2Result = $query2Collection->aggregate($query2Pipeline);
 
 // Display the results
 foreach ($query2Result as $document) {
-    echo "Genre: " . $document['_id'] . ", Count: " . $document['count'] . "\n";
+    echo "Genre: " . $document['_id'] . ", Count: " . $document['count'] . "<br>";
 }
 
 echo "<p>******************************</p>";
