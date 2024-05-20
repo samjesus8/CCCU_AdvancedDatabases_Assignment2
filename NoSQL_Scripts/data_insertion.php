@@ -25,11 +25,6 @@ try {
         return $data;
     }
 
-    // Function to check if a string is a valid ObjectId
-    function isValidObjectId($id) {
-        return preg_match('/^[a-f\d]{24}$/i', $id);
-    }
-
     // Function to ensure a string is valid UTF-8
     function ensureUTF8($string) {
         return mb_convert_encoding($string, 'UTF-8', 'UTF-8');
