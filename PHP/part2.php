@@ -1,68 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PHP MongoDB Queries</title>
+</head>
+<body>
+
+<h2>MongoDB Query Results:</h2>
+
 <?php
-// Database connection details
-$host = 'bvk6p7stycgeooolszfe-mysql.services.clever-cloud.com';
-$dbname = 'bvk6p7stycgeooolszfe';
-$username = 'utknvlfaehqhnhvj';
-$password = 'F2si8fp7rKnM4CFhMrzJ';
+require 'vendor/autoload.php'; // Include the Composer autoloader
 
-try {
-    // Connect to the database
-    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Connected successfully<br>";
+try{
 
-    // Function to execute SQL queries and display results
-    function executeQuery($conn, $query) {
-        $stmt = $conn->prepare($query);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Display results
-        echo "<pre>";
-        print_r($results);
-        echo "</pre>";
-    }
+// Create a MongoDB client and access the database
+$client = new MongoDB\Client("mongodb+srv://RyanJudd96:Flapjack96@movies.sz0lxn6.mongodb.net/");
+$database = $client->Movies;
 
-    // Query 1: Select all movies with their average scores
-    $query1 = "
-        SELECT m.title, AVG(s.score) AS avg_score
-        FROM Movie m
-        LEFT JOIN Score_movie s ON m.movieId = s.movieId
-        GROUP BY m.title
-        ORDER BY avg_score DESC;
-    ";
-    echo "<h2>Query 1: Average Scores of Movies</h2>";
-    executeQuery($conn, $query1);
+//************ QUERY 1 *************** */
 
-    // Query 2: Select top 3 actors who have acted in the most movies
-    $query2 = "
-        SELECT a.name, a.surname, COUNT(r.movieId) AS movie_count
-        FROM Artist a
-        JOIN Role r ON a.artistId = r.actorId
-        GROUP BY a.name, a.surname
-        ORDER BY movie_count DESC
-        LIMIT 3;
-    ";
-    echo "<h2>Query 2: Top Actors by Movie Count</h2>";
-    executeQuery($conn, $query2);
+echo "<p>************ QUERY 1 ***************</p>";
+echo "<p>Finds all the entries for the Movies collection.</p>";
 
-    //Create a view to display movies and their genres
-    $createViewQuery = "
-        CREATE OR REPLACE VIEW Movie_Genre_View AS
-        SELECT m.title, m.genre
-        FROM Movie m;
-    ";
-    $stmt = $conn->prepare($createViewQuery);
-    $stmt->execute();
+// Access the collection and perform and display query results
+$query1Collection = $database->movie;
+$query1 = $query1Collection->find();
 
-    // Query 3: Select all movies and their genres from the created view
-    $query3 = "
-        SELECT * FROM Movie_Genre_View;
-    ";
-    echo "<h2>Query 3: Movies and Their Genres</h2>";
-    executeQuery($conn, $query3);
+foreach ($query1 as $document) {
+    echo "<p>Title: " . $document['title'] . "</p>";
+    echo "<p>Year: " . $document['year'] . "</p>";
+    echo "<p>Genre: " . $document['genre'] . "</p>";
+    echo "<p>Summary: " . $document['summary'] . "</p>";
+    echo "<p>Poducer ID: " . $document['producerId'] . "</p>";
+    echo "<p>Country: " . $document['countryCode'] . "</p>";
+    echo "<hr>";
+}
 
-} catch(PDOException $e) {
+echo "<p>******************************</p>";
+
+//************ QUERY 2 ************* */
+
+echo "<p>************ QUERY 2 ***************</p>";
+echo "<p>Displays a count for each type of genre.</p>";
+
+$query2Collection = $database->movie;
+$query2Pipeline = [['$group' => ['_id' => '$genre', 'count' => ['$sum' => 1]]]];
+
+// Execute the aggregation pipeline
+$query2Result = $query2Collection->aggregate($query2Pipeline);
+
+// Display the results
+foreach ($query2Result as $document) {
+    echo "Genre: " . $document['_id'] . ", Count: " . $document['count'] . "\n";
+}
+
+echo "<p>******************************</p>";
+
+//************ QUERY 3 ************* */
+
+echo "<p>************ QUERY 3 ***************</p>";
+echo "<p>Displays a count for how many role each ID has.</p>";
+
+$query3Collection = $database->roles;
+$query3Pipeline = [
+    [
+        '$group' => [
+            '_id' => '$actorId',
+            'count' => ['$sum' => 1]
+        ]
+    ],
+    [
+        '$project' => [
+            'actorId' => '$_id',
+            'roleCount' => '$count',
+            '_id' => 0
+        ]
+    ]
+];
+
+$query3Result = $collection->aggregate($query3Pipeline);
+
+foreach ($query3Result as $document) {
+    echo "Actor ID: " . $document['actorId'] . ", Role Count: " . $document['roleCount'] . "\n";
+}
+
+}
+
+catch(PDOException $e) 
+{
     echo "Connection failed: " . $e->getMessage();
 }
+
 ?>
+</body>
+</html>
