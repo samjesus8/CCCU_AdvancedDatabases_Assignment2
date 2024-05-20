@@ -13,7 +13,7 @@ require 'vendor/autoload.php'; // Include the Composer autoloader
 try{
 
 // Create a MongoDB client and access the database
-$client = new MongoDB\Client("mongodb+srv://RyanJudd96:Flapjack96@movies.sz0lxn6.mongodb.net/");
+$client = new MongoDB\Client("mongodb+srv://RyanJudd96:password1234@movies.sz0lxn6.mongodb.net/");
 $database = $client->Movies;
 
 //************ QUERY 1 *************** */
