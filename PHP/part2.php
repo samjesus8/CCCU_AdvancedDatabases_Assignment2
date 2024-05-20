@@ -77,10 +77,10 @@ $query3Pipeline = [
     ]
 ];
 
-$query3Result = $collection->aggregate($query3Pipeline);
+$query3Result = $query3Collection->aggregate($query3Pipeline);
 
 foreach ($query3Result as $document) {
-    echo "Actor ID: " . $document['actorId'] . ", Role Count: " . $document['roleCount'] . "\n";
+    echo "Actor ID: " . $document['actorId'] . ", Role Count: " . $document['roleCount'] . "<br>";
 }
 
 }
